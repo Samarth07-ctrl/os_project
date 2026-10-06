@@ -48,7 +48,7 @@ const corsOptions = {
     ].filter(Boolean);
 
     // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o.replace('*', '')))) {
+    if (!origin || origin === 'null' || allowedOrigins.some(o => origin.startsWith(o.replace('*', '')))) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked: ${origin}`));
@@ -67,6 +67,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
+// OS & AI Engineering Middlewares
+const { router: cacheRouter, cacheMiddleware } = require('./routes/cache');
+const { auditMiddleware } = require('./modules/security/anomalyDetector');
+app.use(auditMiddleware);
+
 // ──────────────────────────────────────────
 // ROUTES
 // ──────────────────────────────────────────
@@ -75,6 +80,18 @@ app.use('/api/classrooms', require('./routes/classrooms'));
 app.use('/api/assignments', require('./routes/assignments'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
+
+// OS & AI Modules Routes
+app.use('/api/cache', cacheRouter);
+app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/concurrency', require('./routes/concurrency'));
+app.use('/api/resources', require('./routes/resources'));
+app.use('/api/security', require('./routes/security'));
+app.use('/api/storage', require('./routes/storage'));
+app.use('/api/os-lab', require('./routes/osLab'));
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check
 app.get('/api/health', (req, res) => {

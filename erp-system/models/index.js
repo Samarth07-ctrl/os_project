@@ -126,4 +126,60 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model('Notification', notificationSchema);
 
-module.exports = { User, Classroom, Assignment, Submission, Notification };
+// ─────────────────────────────────────────
+// ELECTIVE / LAB SLOT MODEL (Unit 2: Concurrency & Mutex)
+// ─────────────────────────────────────────
+const electiveSlotSchema = new mongoose.Schema({
+  courseCode: { type: String, required: true, trim: true },
+  courseName: { type: String, required: true, trim: true },
+  instructor: { type: String, default: 'Dept Faculty' },
+  totalCapacity: { type: Number, required: true, min: 1 },
+  availableSeats: { type: Number, required: true },
+  enrolledStudents: [{
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    studentName: { type: String, required: true },
+    bookedAt: { type: Date, default: Date.now }
+  }],
+  room: { type: String, default: 'Lab 301' }
+}, { timestamps: true });
+
+const ElectiveSlot = mongoose.model('ElectiveSlot', electiveSlotSchema);
+
+// ─────────────────────────────────────────
+// CAMPUS RESOURCE MODEL (Unit 4: Deadlocks & Banker's Algorithm)
+// ─────────────────────────────────────────
+const campusResourceSchema = new mongoose.Schema({
+  resourceName: { type: String, required: true, unique: true },
+  totalInstances: { type: Number, required: true, min: 1 },
+  availableInstances: { type: Number, required: true },
+  allocations: [{
+    department: { type: String, required: true },
+    allocated: { type: Number, default: 0 },
+    maxClaim: { type: Number, required: true }
+  }]
+}, { timestamps: true });
+
+const CampusResource = mongoose.model('CampusResource', campusResourceSchema);
+
+// ─────────────────────────────────────────
+// AUDIT LOG MODEL (AI Assignment 3: Anomaly Detection)
+// ─────────────────────────────────────────
+const auditLogSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  userName: { type: String, default: 'Guest' },
+  role: { type: String, default: 'anonymous' },
+  action: { type: String, required: true },
+  endpoint: { type: String, default: '' },
+  ip: { type: String, default: '127.0.0.1' },
+  status: { type: String, default: 'SUCCESS' },
+  anomalyScore: { type: Number, default: 0 },
+  isAnomaly: { type: Boolean, default: false },
+  anomalyReason: { type: String, default: '' },
+  details: { type: Object, default: {} },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const AuditLog = mongoose.model('AuditLog', auditLogSchema);
+
+module.exports = { User, Classroom, Assignment, Submission, Notification, ElectiveSlot, CampusResource, AuditLog };
+

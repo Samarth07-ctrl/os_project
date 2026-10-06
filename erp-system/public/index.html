@@ -278,8 +278,38 @@ tbody tr:hover{background:var(--bg)}
   .cg{grid-template-columns:1fr}
   .sr{grid-template-columns:repeat(2,1fr)}
   .g2{grid-template-columns:1fr}
-  .np{width:100%}
-}
+/* OS & AI MODULES STYLING */
+.os-subnav{display:flex;gap:8px;background:var(--surface);padding:6px;border-radius:var(--r);border:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.os-tab-btn{padding:8px 16px;border:none;background:none;border-radius:var(--rs);font-family:var(--f);font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.os-tab-btn.active{background:var(--accent);color:white}
+.os-tab-btn:hover:not(.active){background:var(--surface2)}
+
+.gantt-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 14px 28px 14px;overflow-x:auto;gap:4px;min-height:75px}
+.gantt-block{display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:700;font-size:11.5px;border-radius:4px;min-width:44px;height:42px;position:relative;transition:transform .15s;flex-shrink:0}
+.gantt-block:hover{transform:scale(1.05);z-index:2}
+.gantt-time-start{position:absolute;bottom:-20px;left:0;font-size:10px;color:var(--text3);font-family:var(--m);font-weight:600}
+.gantt-time-end{position:absolute;bottom:-20px;right:0;font-size:10px;color:var(--text3);font-family:var(--m);font-weight:600}
+
+.matrix-table{width:100%;border-collapse:collapse;margin-top:10px;font-family:var(--m);font-size:12px}
+.matrix-table th,.matrix-table td{border:1px solid var(--border);padding:8px 10px;text-align:center}
+.matrix-table th{background:var(--surface2);font-weight:600}
+
+.term-window{background:#0D1117;color:#58A6FF;font-family:var(--m);border-radius:var(--r);border:1px solid #30363D;box-shadow:var(--shm);overflow:hidden}
+.term-header{background:#161B22;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #30363D}
+.term-dots{display:flex;gap:6px}
+.term-dot{width:10px;height:10px;border-radius:50%}
+.term-dot.r{background:#FF5F56}.term-dot.y{background:#FFBD2E}.term-dot.g{background:#27C93F}
+.term-body{padding:14px;min-height:220px;max-height:360px;overflow-y:auto;font-size:12.5px;line-height:1.6;color:#C9D1D9;white-space:pre-wrap}
+.term-input-row{display:flex;align-items:center;background:#161B22;padding:8px 14px;border-top:1px solid #30363D}
+.term-prompt{color:#3FB950;font-weight:600;margin-right:8px;font-family:var(--m);font-size:13px}
+.term-input{flex:1;background:none;border:none;outline:none;color:#FFFFFF;font-family:var(--m);font-size:13px}
+
+.frame-flow{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}
+.frame-col{display:flex;flex-direction:column;align-items:center;min-width:54px;border:1px solid var(--border);border-radius:var(--rs);padding:6px;background:var(--surface)}
+.frame-page-tag{font-weight:800;font-size:13px;padding:3px 6px;border-radius:4px;margin-bottom:6px}
+.frame-page-tag.hit{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.frame-page-tag.fault{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.frame-cell{width:100%;text-align:center;padding:5px 0;border-top:1px solid var(--border);font-family:var(--m);font-size:12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -381,8 +411,16 @@ tbody tr:hover{background:var(--bg)}
       <div class="page" id="page-my-marks"></div>
       <div class="page" id="page-users"></div>
       <div class="page" id="page-analytics"></div>
-      <div class="page" id="page-profile"></div>
+      <div class="page" id="page-profile"></div>    
       <div class="page" id="page-activity"></div>
+      <!-- OS & AI ENGINEERING MODULES -->
+      <div class="page" id="page-os-lab"></div>
+      <div class="page" id="page-task-scheduler"></div>
+      <div class="page" id="page-concurrency"></div>
+      <div class="page" id="page-cache-telemetry"></div>
+      <div class="page" id="page-campus-allocator"></div>
+      <div class="page" id="page-security-soc"></div>
+      <div class="page" id="page-storage-dedup"></div>
     </div>
   </div>
 </div>
@@ -562,17 +600,36 @@ function updateUser() {
 }
 
 function buildNav() {
-  const common = [{id:'dashboard',lbl:'Dashboard',ic:'📊'}];
-  const extra = {
-    professor: [{id:'classrooms',lbl:'My Classrooms',ic:'🏫'},{id:'activity',lbl:'Activity Feed',ic:'📡'},{id:'profile',lbl:'My Profile',ic:'👤'}],
-    student:   [{id:'classrooms',lbl:'My Classrooms',ic:'🏫'},{id:'my-marks',lbl:'My Grades',ic:'🎯'},{id:'profile',lbl:'My Profile',ic:'👤'}],
-    admin:     [{id:'classrooms',lbl:'All Classrooms',ic:'🏫'},{id:'users',lbl:'Manage Users',ic:'👥'},{id:'analytics',lbl:'Analytics',ic:'📈'},{id:'profile',lbl:'My Profile',ic:'👤'}]
+  const common = [{id:'dashboard',lbl:'Dashboard',ic:'📊'}, {id:'classrooms',lbl: CU.role==='admin'?'All Classrooms':'My Classrooms',ic:'🏫'}];
+  const roleExtra = {
+    professor: [{id:'activity',lbl:'Activity Feed',ic:'📡'},{id:'profile',lbl:'My Profile',ic:'👤'}],
+    student:   [{id:'my-marks',lbl:'My Grades',ic:'🎯'},{id:'profile',lbl:'My Profile',ic:'👤'}],
+    admin:     [{id:'users',lbl:'Manage Users',ic:'👥'},{id:'analytics',lbl:'Analytics',ic:'📈'},{id:'profile',lbl:'My Profile',ic:'👤'}]
   };
-  const items = [...common,...(extra[CU.role]||[])];
+  const osModules = [
+    {id:'os-lab',lbl:'OS Virtual Lab',ic:'🧪'},
+    {id:'task-scheduler',lbl:'OS Task Scheduler',ic:'⚡'},
+    {id:'concurrency',lbl:'Course Slots & Mutex',ic:'🔒'},
+    {id:'cache-telemetry',lbl:'LRU Cache & Memory',ic:'🧠'},
+    {id:'campus-allocator',lbl:"Banker's Allocator",ic:'📦'},
+    {id:'security-soc',lbl:'Security & Anomaly',ic:'🛡️'},
+    {id:'storage-dedup',lbl:'Storage & Dedup',ic:'💾'}
+  ];
+  const items = [...common,...(roleExtra[CU.role]||[]), ...osModules];
   $('sbnav').innerHTML = items.map(i=>`<div class="sb-item" id="nav-${i.id}" onclick="navTo('${i.id}')"><span class="sb-ico">${i.ic}</span><span>${i.lbl}</span></div>`).join('');
 }
 
-const pageTitles = {dashboard:'Dashboard',classrooms:'Classrooms','classroom-detail':'Classroom','assignment-detail':'Assignment','my-marks':'My Grades',users:'Users',analytics:'Analytics',profile:'My Profile',activity:'Activity Feed'};
+const pageTitles = {
+  dashboard:'Dashboard',classrooms:'Classrooms','classroom-detail':'Classroom','assignment-detail':'Assignment',
+  'my-marks':'My Grades',users:'Users',analytics:'Analytics',profile:'My Profile',activity:'Activity Feed',
+  'os-lab':'OS Virtual Lab & Simulators',
+  'task-scheduler':'OS Background Task Scheduler',
+  'concurrency':'Concurrency Control & Mutex Seat Booking',
+  'cache-telemetry':'OS Memory & In-Memory LRU Cache',
+  'campus-allocator':"Banker's Algorithm Campus Resource Allocator",
+  'security-soc':'AI Security Operations & Log Anomaly Detector',
+  'storage-dedup':'Content-Addressable File Deduplication & Quota'
+};
 
 function navTo(pid, data) {
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
@@ -590,6 +647,13 @@ function navTo(pid, data) {
     case 'analytics': loadAnalytics(); break;
     case 'profile': loadProfile(); break;
     case 'activity': loadActivity(); break;
+    case 'os-lab': if (window.loadOSLab) window.loadOSLab(); break;
+    case 'task-scheduler': if (window.loadTaskScheduler) window.loadTaskScheduler(); break;
+    case 'concurrency': if (window.loadConcurrency) window.loadConcurrency(); break;
+    case 'cache-telemetry': if (window.loadCacheTelemetry) window.loadCacheTelemetry(); break;
+    case 'campus-allocator': if (window.loadCampusAllocator) window.loadCampusAllocator(); break;
+    case 'security-soc': if (window.loadSecuritySOC) window.loadSecuritySOC(); break;
+    case 'storage-dedup': if (window.loadStorageDedup) window.loadStorageDedup(); break;
   }
 }
 
@@ -1653,5 +1717,6 @@ async function markAllRead() { await api('/notifications/read-all',{method:'PATC
 function startPoll() { loadNotifs(); pollTimer=setInterval(loadNotifs,60000); }
 
 </script>
+<script src="/os-modules.js"></script>
 </body>
 </html>
