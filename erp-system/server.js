@@ -113,18 +113,25 @@ app.use((err, req, res, next) => {
 // DATABASE CONNECTION & ADMIN SEED
 // ──────────────────────────────────────────
 const connectDB = async () => {
+  const uri = process.env.MONGODB_URI;
   try {
-    // ⚠️  PUT YOUR MONGODB ATLAS URI IN THE .env FILE AS MONGODB_URI
-    const uri = process.env.MONGODB_URI;
     if (!uri || uri.includes('<username>')) {
       throw new Error('Please configure MONGODB_URI in your .env file with your actual MongoDB Atlas connection string.');
     }
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     console.log('✅ MongoDB Atlas connected successfully');
     await seedAdmin();
   } catch (err) {
-    console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
+    console.warn('⚠️  MongoDB Atlas connection failed:', err.message);
+    console.log('🔄 Falling back to local MongoDB (mongodb://127.0.0.1:27017/academia_erp)...');
+    try {
+      await mongoose.connect('mongodb://127.0.0.1:27017/academia_erp');
+      console.log('✅ Connected to local MongoDB successfully');
+      await seedAdmin();
+    } catch (localErr) {
+      console.error('❌ Local MongoDB connection failed:', localErr.message);
+      process.exit(1);
+    }
   }
 };
 
